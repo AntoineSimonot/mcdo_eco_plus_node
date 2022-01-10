@@ -9,7 +9,8 @@ var jwtexpress = require('express-jwt');
 app.use(jwtexpress({ secret: process.env.SECRET, algorithms: ['HS256']}).unless({
     path: [
         '/auth',
-        '/users'
+        { url:'/users', methods: ['POST'] }
+
     ]
 }));
 
