@@ -1,19 +1,13 @@
 import express from 'express';
 import { Message } from '../models/Message';
-const { body, validationResult } = require('express-validator');
+import { User } from '../models/User';
+import messageValidator from '../validators/messageValidator';
 
 let router = express.Router();
 
 router.post("/messages", 
-    body('content').isLength({ min: 1 }).withMessage('Content is required'),
-    body('content').isLength({ max: 255 }).withMessage('Content must be less than 255 characters'),
+    messageValidator,
     async (req, res) => {
-
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
-    
     const message = new Message();
     message.content = req.body.content;
     // @ts-ignore
