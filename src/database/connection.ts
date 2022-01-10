@@ -1,6 +1,6 @@
 import { createConnection, getConnection } from "typeorm";
-import { Message } from "../Models/Message";
-import { User } from "../Models/User";
+import { Message } from "../models/Message";
+import { User } from "../models/User";
 import express from 'express';
 import * as bodyParser from 'body-parser'
 
