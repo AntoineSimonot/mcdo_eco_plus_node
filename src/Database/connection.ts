@@ -5,7 +5,6 @@ import express from 'express';
 import * as bodyParser from 'body-parser'
 
 const app = express();
-const port = 3009;
 app.use(bodyParser.json())
 
 createConnection({
@@ -22,7 +21,5 @@ createConnection({
     synchronize: true,
     logging: true
 })
-
-app.listen(port);
 
 export default app;

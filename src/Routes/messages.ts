@@ -5,7 +5,7 @@ import { Message } from '../Models/Message';
 
 let router = express.Router();
 
-router.post("/messages/create", async (req, res) => {
+router.post("/messages", async (req, res) => {
     const message = new Message();
     message.content = req.body.content;
     // @ts-ignore

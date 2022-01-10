@@ -5,13 +5,13 @@ import * as jwt from 'jsonwebtoken'
 
 let router = express.Router();
 
-router.get('/', async (req, res) => {
+router.get('/auth', async (req, res) => {
     let user = await User.findOne({where: {  
         email: req.body.email,
         password: sha512.sha512(req.body.password)
     }})
 
-    let token = jwt.sign({ id: user.id }, 'ThisIsMySecretSentenceBlaBlaBla');
+    let token = jwt.sign({ id: user.id }, process.env.SECRET);
 
     res.json({status: 200, data: token})
 
