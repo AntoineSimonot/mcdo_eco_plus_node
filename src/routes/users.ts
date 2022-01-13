@@ -11,14 +11,27 @@ router.post('/users',
     userValidator,
     async (req, res) => {
 
-    const user = new User();
-    user.firstname = req.body.firstname;
-    user.lastname = req.body.lastname;
-    user.email = req.body.email;
-    user.password = sha512.sha512(req.body.password);
-    await user.save();
+    const userExists = await User.findOne({
+        where: {
+            email: req.body.email
+        }
+    });
 
-    res.json({status : 200, data: user})
+    if (userExists) {
+        res.json({status : 409, data: "user already exists"});
+    }
+
+    else {
+        const user = new User();
+        user.firstname = req.body.firstname;
+        user.lastname = req.body.lastname;
+        user.email = req.body.email;
+        user.password = sha512.sha512(req.body.password);
+
+        await user.save();
+
+        res.json({status : 200, data: user})
+    }
 })
 
 router.get('/auth', 
@@ -35,9 +48,14 @@ router.get('/auth',
 })
 
 router.get('/users/me', async (req, res) => {
-    // @ts-ignore
     let user = await User.findOne({where: { id: req.user.id }})
 
+    res.json({status : 200, data: user})
+})
+
+// get one user
+router.get('/users/:id', async (req, res) => {
+    const user = await User.findOne({where: { id: req.params.id }})
     res.json({status : 200, data: user})
 })
 

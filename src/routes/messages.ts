@@ -1,6 +1,5 @@
 import express from 'express';
 import { Message } from '../models/Message';
-import { User } from '../models/User';
 import messageValidator from '../validators/messageValidator';
 
 let router = express.Router();
@@ -10,10 +9,9 @@ router.post("/messages",
     async (req, res) => {
     const message = new Message();
     message.content = req.body.content;
-    // @ts-ignore
-    message.user = await User.findOne({where: { id: req.user.id }});
+    message.user = req.user;
     await message.save();
-  
+    req.io.emit('message', {"message": message.content});
     res.json({status: 200, data: message});
   });
   
