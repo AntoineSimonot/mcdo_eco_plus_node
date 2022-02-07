@@ -3,6 +3,7 @@ import * as sha512 from 'js-sha512'
 import { User } from '../models/User';
 import * as jwt from 'jsonwebtoken'
 import userValidator from '../validators/userValidator';
+import { Terminal } from '../models/Terminal';
 
 let router = express.Router();
 
@@ -34,16 +35,56 @@ router.post('/users',
     }
 })
 
-router.get('/auth', 
+router.post('/users/auth', 
     async (req, res) => {
-    let user = await User.findOne({where: {  
-        email: req.body.email,
-        password: sha512.sha512(req.body.password)
-    }})
+    if (req.body.serial) {
+        let terminal = await Terminal.findOne({
+            where: {
+                serial: req.body.serial
+            }
+        });
 
-    let token = jwt.sign({ id: user.id }, process.env.SECRET);
+        if (terminal) {
+            let user = await User.findOne({
+                where: {
+                    terminal: terminal.id
+                }
+            });
 
-    res.json({status: 200, data: token})
+            if (user) {
+                let token = jwt.sign({
+                    id: user.id,
+                }, process.env.SECRET);
+
+                res.json({status : 200, data: token});
+
+            };
+        }
+        else {
+            return res.json({status : 400, data: "terminal does not exist"});
+        }
+    }
+
+    else {
+        let user = await User.findOne({
+            where: {
+                email: req.body.email,
+                password: sha512.sha512(req.body.password)
+            }
+        });
+
+        if (user) {
+            let token = jwt.sign({
+                id: user.id,
+            }, process.env.SECRET);
+
+            res.json({status : 200, data: token});
+
+        }
+        else {
+            return res.json({status : 400, data: "user does not exist"});
+        }
+    }
 
 })
 

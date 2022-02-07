@@ -1,42 +1,52 @@
-import "reflect-metadata";
-import app from "./database/connection";
-import UserRouter from "./routes/users";
-import MessageRouter from "./routes/messages";
-import { User } from "./models/User";
-import {Server} from "socket.io";
+import app from './database/connection';
+import { User } from './models/User';
+import UserRouter from "./routes/Users";
+import ProductRouter from "./routes/products";
+import IngredientRouter from "./routes/ingredients";
+import OrderRouter from "./routes/orders";
+import FileRouter from "./routes/files";
+
+import TerminalRouter from "./routes/terminals";
 require('dotenv').config()
+
+const bodyParser = require('body-parser');
+const jwtexpress = require('express-jwt');
+const cors = require("cors");
+const fileUpload = require('express-fileupload');
 
 declare global {
     namespace Express {
       interface Request {
         user: User
-        io: Server
+        files: File
       }
     }
 }
 
-var cors = require("cors");
 app.use(cors());
 
-const http = require('http');
-const server = http.createServer(app);
-const io = new Server(server, {
-    cors: {
-        origin: "*",
-        methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-    }
-});
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
 
-io.on('connection', (socket) => {
-    console.log('a user connected');
-});
+app.use(fileUpload({
+    createParentPath: true
+}));
 
+app.use(jwtexpress({ secret: process.env.SECRET, algorithms: ['HS256']}).unless({
+    path: [
+        '/users/auth',
+        '/terminals/auth',
+        '/terminals',
+        { url: "/products", methods: ['GET'] },
+        { url: "/users", methods: ['POST'] },
+        { url: "/orders", methods: ['GET'] },
+        { url: /^\/orders\/.*/, methods: ['GET'] }
+    ]
+}));
 
 app.use(async (req, res, next) => {
-    req.io = io;
-
     if (req.user) {
-        req.user = await User.findOne({ where: {id: req.user.id}});
+        req.user = await User.findOne({ where: {id: req.user.id}, relations: ["terminal"] });
         next();
     }
     else {
@@ -44,9 +54,11 @@ app.use(async (req, res, next) => {
     }
 })
 
-app.use(UserRouter)
-app.use(MessageRouter)
+app.use(UserRouter);
+app.use(ProductRouter);
+app.use(IngredientRouter);
+app.use(OrderRouter);
+app.use(TerminalRouter);
+app.use(FileRouter);
 
-server.listen(process.env.PORT, () => {
-    console.log(`Server is running on port ${process.env.PORT}`);
-});
+app.listen(process.env.PORT)
