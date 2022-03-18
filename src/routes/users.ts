@@ -37,14 +37,16 @@ router.post('/users',
 
 router.post('/users/auth', 
     async (req, res) => {
+
     if (req.body.serial) {
         let terminal = await Terminal.findOne({
+
             where: {
                 serial: req.body.serial
             }
         });
 
-        if (terminal) {
+        if (terminal != null) {
             let user = await User.findOne({
                 where: {
                     terminal: terminal.id

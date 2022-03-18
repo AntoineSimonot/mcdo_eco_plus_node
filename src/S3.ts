@@ -10,7 +10,7 @@ const s3 = new AWS.S3({
     secretAccessKey: process.env.SECRET_KEY
 });
 
-function uploadFile(file) {
+async function uploadFile(file) {
     var id = crypto.randomBytes(5).toString('hex');
 
     const params = {
@@ -19,17 +19,24 @@ function uploadFile(file) {
         Body: file.data
     };
 
+
     // Uploading files to the bucket
-    s3.upload(params, function(err, data) {
-        if (err) throw err;
-        console.log(`File uploaded successfully ` + data.Location);
 
-        let file = new File();
-        file.location = data.Location;
-        file.save();
+    const s3Upload = new Promise((resolve, reject) => {
+        s3.upload(params, function(err, data) {
+            if (err) throw err;
+            let image = new File();
 
-        return data.Location;
-    });
+            image.location = data.Location;
+            resolve(image.save());
+        });   
+     })
+
+ 
+
+    let image = await s3Upload
+
+    return image
 }
 
 export default uploadFile;

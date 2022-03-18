@@ -25,11 +25,14 @@ router.post('/orders', orderValidator_1.orderValidatorPost, (req, res) => __awai
     yield order.save();
     let products = yield orderHelper_1.getProAndExcludedIng(req);
     yield orderHelper_1.saveProAndExcludedIng(products, order);
-    return res.json({ status: 200, data: "order created" });
+    const order_data = yield Order_1.Order.findOne({ where: { orderId: order.orderId }, relations: ["otp", "otp.product", "user", "otp.product.pti", "otp.product.pti.ingredient"] });
+    req.io.emit('ingredients', { "ingredients": order_data.otp });
+    req.io.emit('order', { "order": order_data });
+    return res.json({ status: 200, data: order_data });
 }));
 //get all orders
 router.get('/orders', (req, res) => __awaiter(this, void 0, void 0, function* () {
-    const orders = yield Order_1.Order.find({ relations: ["otp", "otp.product", "user"] });
+    const orders = yield Order_1.Order.find({ relations: ["otp", "otp.product", "user", "otp.product.pti", "otp.product.pti.ingredient"] });
     res.json({ status: 200, data: orders });
 }));
 // get an order

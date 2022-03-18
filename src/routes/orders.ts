@@ -22,14 +22,21 @@ router.post('/orders',
     let products = await getProAndExcludedIng(req);
 
     await saveProAndExcludedIng(products, order);
+    
+    const order_data = await Order.findOne({where: { orderId: order.orderId }, relations: ["otp", "otp.product", "user", "otp.excluded_ingredients", "otp.product.pti", "otp.product.pti.ingredient"] });
 
-    return res.json({status : 200, data: "order created"});
+    req.io.emit('ingredients', {"ingredients": order_data.otp});
+
+    req.io.emit('order', {"order": order_data});
+
+
+    return res.json({status : 200, data: order_data});
 
 })
 
 //get all orders
 router.get('/orders', async (req, res) => {
-    const orders = await Order.find({ relations: ["otp", "otp.product", "user"] });
+    const orders = await Order.find({ relations: ["otp", "otp.product", "user", "otp.product.pti", "otp.excluded_ingredients", "otp.product.pti.ingredient"] });
     
     res.json({status : 200, data: orders})
 })

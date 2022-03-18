@@ -9,17 +9,19 @@ export class OrderToProduct extends BaseEntity  {
     @PrimaryGeneratedColumn()
     orderToProductId!: number;
 
-    @ManyToOne(() => Order, order => order.otp, {
-    })
+    @ManyToOne(() => Order, order => order.otp, 
+    )
     order: Order;
 
     @ManyToOne(() => Product, product => product.otp, 
+    { nullable:true, cascade: true, onDelete: 'CASCADE' }
     )
     product: Product;
 
 
-    @ManyToMany(type => Ingredient, ingredient => ingredient.pti, {
-        cascade: true,
+    @ManyToMany(type => Ingredient, ingredient => ingredient.pti, 
+    {
+        nullable:true,cascade: true, onDelete: 'CASCADE'
     })
     @JoinTable({name: 'excluded_ingredient'})
     excluded_ingredients: Ingredient[];

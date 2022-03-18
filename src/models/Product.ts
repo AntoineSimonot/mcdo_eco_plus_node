@@ -18,10 +18,12 @@ export class Product extends BaseEntity {
     @Column()
     custom: boolean;
 
-    @OneToMany(() => ProductToIngredient, pti => pti.product)
+    @OneToMany(() => ProductToIngredient, pti => pti.product, 
+    )
     pti: ProductToIngredient[];
 
-    @OneToMany(() => OrderToProduct, otp => otp.product)
+    @OneToMany(() => OrderToProduct, otp => otp.product,{
+    })
     otp: OrderToProduct[];
 
     @ManyToOne(() => File, file => file.product)

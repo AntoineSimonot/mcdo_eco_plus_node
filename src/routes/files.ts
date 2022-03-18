@@ -5,21 +5,23 @@ import uploadFile from '../S3';
 let router = express.Router();
 
 router.post('/files', async (req, res) => {
+
     if (req.files) {
         // @ts-ignore
-        let avatar = req.files.avatar;
-
-        uploadFile(avatar);
+        let image = req.files.image;
+        let file = await uploadFile(image) as File;
 
         return res.json({
             status: 200,
-            message: 'File is uploaded',
+            data: {
+                id: file.id
+            },
         });
     }
 
     return res.json({
         status: 400,
-        message: 'No file uploaded'
+        data: 'No file uploaded'
     });
 
 })

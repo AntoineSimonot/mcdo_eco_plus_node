@@ -19,13 +19,14 @@ const productValidator_1 = require("../validators/productValidator");
 let router = express_1.default.Router();
 // create a new product
 router.post('/products', productValidator_1.productValidatorPost, (req, res) => __awaiter(this, void 0, void 0, function* () {
-    const productExist = yield Product_1.Product.findOne({
+    const product = yield Product_1.Product.findOne({
         where: {
             name: req.body.name,
             price: req.body.price
-        }
+        },
+        relations: ["file", "pti", "pti.ingredient", "pti.ingredient.file"]
     });
-    if (productExist === undefined) {
+    if (product === undefined) {
         const product = new Product_1.Product();
         product.name = req.body.name;
         product.price = req.body.price;
@@ -38,7 +39,7 @@ router.post('/products', productValidator_1.productValidatorPost, (req, res) => 
         }
         return res.json({ status: 200, data: product });
     }
-    res.json({ status: 409, data: "product already exists" });
+    res.json({ status: 409, data: Object.assign({}, product, { message: "Product already exists" }) });
 }));
 //get all products
 router.get('/products', (req, res) => __awaiter(this, void 0, void 0, function* () {

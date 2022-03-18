@@ -12,14 +12,16 @@ router.post('/products',
     async (req, res) => {
     
 
-    const productExist = await Product.findOne({
+    const product = await Product.findOne({
         where: {
             name: req.body.name,
             price: req.body.price
-        }
+        },
+        relations: ["file", "pti", "pti.ingredient", "pti.ingredient.file"]
+
     });
 
-    if (productExist === undefined) {
+    if (product === undefined) {
         const product = new Product();
         product.name = req.body.name;
         product.price = req.body.price;
@@ -35,7 +37,9 @@ router.post('/products',
         return res.json({status : 200, data: product})
     }
 
-    res.json({status : 409, data: "product already exists"});
+    console.log(product);
+
+    res.json({status : 409, data: {...product, message: "Product already exists"}})
     
 })
 
@@ -48,7 +52,7 @@ router.get('/products', async (req, res) => {
 
 // get one product
 router.get('/products/:id', async (req, res) => {
-    const product = await Product.findOne({where: { id: req.params.id }, relations: ["pti", "pti.ingredient"] });
+    const product = await Product.findOne({where: { id: req.params.id }, relations: ["file", "pti", "pti.ingredient", "pti.ingredient.file"] });
 
     if (product) {
         return res.json({status : 200, data: product})
@@ -64,8 +68,8 @@ router.put('/products/:id',
     const product = await Product.findOne({where: { id: req.params.id }, relations: ["pti", "pti.ingredient", "file"] });
 
     if (product) {
-        product.name = req.body.name;
-        product.price = req.body.price;
+        product.name = req.body.name || product.name;
+        product.price = req.body.price || product.price;
 
         if (req.body.image) {
             const image = await File.findOne({where: {id: req.body.image}})
@@ -78,7 +82,7 @@ router.put('/products/:id',
 
         if (req.body.ingredients) {
             let ingredients = await getIngredients(req, product)
-            product.pti = ingredients;
+            product.pti = ingredients || product.pti;
             deleteProductToIngredient(req.params.id)
             saveIngredient(ingredients, product);
         }

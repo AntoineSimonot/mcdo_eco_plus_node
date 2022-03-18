@@ -19,7 +19,6 @@ function uploadFile(file) {
     s3.upload(params, function (err, data) {
         if (err)
             throw err;
-        console.log(`File uploaded successfully ` + data.Location);
         let file = new File_1.File();
         file.location = data.Location;
         file.save();

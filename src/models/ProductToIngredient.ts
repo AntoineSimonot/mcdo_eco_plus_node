@@ -13,7 +13,6 @@ export class ProductToIngredient extends BaseEntity {
     product: Product;
 
     @ManyToOne(() => Ingredient, ingredient => ingredient.pti, 
-        { cascade: true, onDelete: 'CASCADE' }
     )
     ingredient: Ingredient;
 }

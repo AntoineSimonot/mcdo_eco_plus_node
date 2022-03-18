@@ -28,10 +28,20 @@ export async function getIngredients (req, product) {
 }
 
 export async function saveIngredient (ingredients, product) {
-    ingredients.forEach(async ingredient => {
-        let pti = new ProductToIngredient();
-        pti.ingredient = ingredient;
-        pti.product = product;
-        await pti.save();
-    });
+    // new promise to save ingredients
+    let test = []
+    const saveIngredients = new Promise<void>((resolve, reject) => {
+        ingredients.forEach(ingredient => {
+            let pti = new ProductToIngredient();
+            pti.ingredient = ingredient;
+            pti.product = product;
+            pti.save();
+            test.push(pti);
+        });
+        resolve();
+    })
+
+    console.log(test)
+    return test
+
 }

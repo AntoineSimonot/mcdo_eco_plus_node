@@ -17,7 +17,7 @@ router.post('/ingredients',
         }
     });
 
-    if (ingredientExist != null) {
+    if (ingredientExist === undefined) {
         const ingredient = new Ingredient();
         ingredient.name = req.body.name;
         ingredient.price = req.body.price;
@@ -39,7 +39,7 @@ router.get('/ingredients', async (req, res) => {
 
 // get an ingredient
 router.get('/ingredients/:id', async (req, res) => {
-    const ingredient = await Ingredient.findOne({where: {id: req.params.id}});
+    const ingredient = await Ingredient.findOne({where: {id: req.params.id}, relations: ["file"]});
     return res.json({status : 200, data: ingredient})
 })
 
@@ -47,15 +47,19 @@ router.get('/ingredients/:id', async (req, res) => {
 router.put('/ingredients/:id',
     IngredientValidatorPut,
     async (req, res) => {
-        
-    const ingredient = await Ingredient.findOne({where: {id: req.params.id}});
+
+    const ingredient = await Ingredient.findOne({where: {id: req.params.id}, relations: ["file"]});
 
     if (ingredient != null) {
-        ingredient.name = req.body.name;
-        ingredient.price = req.body.price;
-        ingredient.quantity = req.body.quantity;
+        ingredient.name = req.body.name || ingredient.name;
+        ingredient.price = req.body.price || ingredient.price;
+        if (req.body.quantity != null) {
+            ingredient.quantity = req.body.quantity
+        }
+        else{
+            ingredient.quantity = ingredient.quantity
+        }
 
-       
         if (req.body.image) {
             const image = await File.findOne({where: {id: req.body.image}})
 
